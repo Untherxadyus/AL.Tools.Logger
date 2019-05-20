@@ -9,6 +9,9 @@ using System.Xml;
 
 namespace AL.Tools.Logger
 {
+    /// <summary>
+    /// Allows to generate a XML log file and add entries to it.
+    /// </summary>
     public static class XmlLogger
     {
         //Locker Variable
