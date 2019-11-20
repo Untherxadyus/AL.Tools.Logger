@@ -54,6 +54,11 @@ namespace AL.Tools.Logger
             }
         }
 
+        public static void AddEntry(Exception ex)
+        {
+            AddEntry(ex.Message);
+        }
+
         /// <summary>
         /// Method to retreive Current Log.
         /// </summary>
@@ -86,5 +91,7 @@ namespace AL.Tools.Logger
 
             CurrentLog = LogFile;
         }
+
+        
     }
 }
