@@ -59,6 +59,32 @@ namespace AL.Tools.Logger
             AddEntry(ex.Message);
         }
 
+        public static void AddEntries(IEnumerable<string> Logs)
+        {
+            lock (Locker)
+            {
+                //Verify Log Exists
+                GetCurrentLog();
+
+                //Load current XML
+                var doc = new XmlDocument();
+                doc.Load(CurrentLog);
+
+                foreach (var Message in Logs)
+                {
+                    var node = doc.CreateNode(XmlNodeType.Element, "log_entry", null);
+                    var attr = doc.CreateAttribute("create_date");
+                    attr.InnerText = DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss tt");
+                    node.Attributes.Append(attr);
+                    node.InnerText = Message;
+
+                    doc.DocumentElement.AppendChild(node);
+                }
+
+                doc.Save(CurrentLog);
+            }
+        }
+
         /// <summary>
         /// Method to retreive Current Log.
         /// </summary>
