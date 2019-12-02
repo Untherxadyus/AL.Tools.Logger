@@ -90,8 +90,8 @@ namespace AL.Tools.Logger
         /// </summary>
         private static void GetCurrentLog()
         {
-            //Validate if current log exist
-            if (CurrentLog.IsNotEmpty() && File.Exists(CurrentLog))
+            //Validate if current log exist and has not reached the maximum log entries
+            if (CurrentLog.IsNotEmpty() && File.Exists(CurrentLog) && ValidLogSize())
                 return;
 
             //Get Log Name, get it from the config file
@@ -118,6 +118,46 @@ namespace AL.Tools.Logger
             CurrentLog = LogFile;
         }
 
-        
+        /// <summary>
+        /// Method to validate that current log has reached the maximum entries
+        /// </summary>
+        private static bool ValidLogSize()
+        {
+            // Validate if current log exist
+            if (CurrentLog.IsEmpty() || File.Exists(CurrentLog) == false)
+                return false;
+
+            //Load current XML
+            var doc = new XmlDocument();
+            doc.Load(CurrentLog);
+
+            //If log has not reached max entries
+            if (doc.GetElementsByTagName("log_entry").Count < 10000)
+                return true;
+
+            //Rename current log due to maximum entries reached
+            var date = DateTime.Now;
+            var LogName = $"Archive-{date.ToString("yy")}{new JulianCalendar().GetDayOfYear(date)}";
+            var LogFile = $"{Settings.AssemblyPath}{LogName}.xml";
+
+            //Validate log name
+            var x = 0;
+            while (File.Exists(LogFile))
+            {
+                //Create a way to exit the loop if too many attempts
+                if (x >= 501)
+                    throw new Exception("Unable to get a new log name for XML logging.");
+                x++;
+                LogFile = $"{Settings.AssemblyPath}{LogName}-{x}.xml";
+            }
+
+            //Rename current log
+            File.Move(CurrentLog, LogFile);
+
+            //Clear current log name
+            CurrentLog = string.Empty;
+            return false;
+        }
+
     }
 }
